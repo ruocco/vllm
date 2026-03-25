@@ -35,6 +35,7 @@ class OffloadingConnectorScheduler:
         self.offloaded_block_size = self.gpu_block_size * spec.block_size_factor
         self.block_size_factor = spec.block_size_factor
         self.manager: OffloadingManager = spec.get_manager()
+        self.max_offload_tokens = 512
 
         self._requests: dict[ReqId, Request] = {}
         # list of GPU block IDs per request
@@ -208,8 +209,11 @@ class OffloadingConnectorScheduler:
             new_tokens = scheduler_output.num_scheduled_tokens[req_id]
             expected_tokens = req.num_computed_tokens + new_tokens
             # with async scheduling, some tokens may be missing
-            total_tokens = min(expected_tokens, req.num_tokens)
-            num_blocks = total_tokens // self.offloaded_block_size
+            total_tokens = min(expected_tokens, req.num_tokens, self.max_offload_tokens)
+            logger.info(
+                "Only storing %s tokens: min between expected tokens %s, requests token %s, and set maximum %s",
+                total_tokens, expected_tokens, req.num_tokens, self.max_offload_tokens
+            )
             start_block_idx = self._next_stored_block_idx.get(req_id, 0)
             num_new_blocks = num_blocks - start_block_idx
 

@@ -252,8 +252,9 @@ ARG SCCACHE_REGION_NAME=us-west-2
 ARG SCCACHE_S3_NO_CREDENTIALS=0
 
 # Flag to control whether to use pre-built vLLM wheels
-ARG VLLM_USE_PRECOMPILED=""
-ARG VLLM_MERGE_BASE_COMMIT=""
+ARG VLLM_USE_PRECOMPILED="1"
+ARG VLLM_MERGE_BASE_COMMIT="f262a62aa191b4fc3070a5fd7f418246cb326f06"
+#ARG VLLM_MERGE_BASE_COMMIT="b2dd75eb481f6d45f6ac902292559026765a1433"
 ARG VLLM_MAIN_CUDA_VERSION=""
 
 # Use dummy version for csrc-build wheel (only .so files are extracted, version doesn't matter)
@@ -815,6 +816,7 @@ FROM vllm-openai-base AS vllm-sagemaker
 
 COPY examples/online_serving/sagemaker-entrypoint.sh .
 RUN chmod +x sagemaker-entrypoint.sh
+RUN chmod a+rwx -R /tmp
 ENTRYPOINT ["./sagemaker-entrypoint.sh"]
 
 FROM vllm-openai-base AS vllm-openai
