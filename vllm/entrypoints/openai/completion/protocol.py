@@ -81,6 +81,7 @@ class CompletionRequest(OpenAIBaseModel):
     truncate_prompt_tokens: Annotated[int, Field(ge=-1, le=_INT64_MAX)] | None = None
     allowed_token_ids: list[int] | None = None
     prompt_logprobs: int | None = None
+    offload_prompt_percentage: float | None = 100
     # --8<-- [end:completion-sampling-params]
 
     # --8<-- [start:completion-extra-params]
@@ -319,6 +320,7 @@ class CompletionRequest(OpenAIBaseModel):
             structured_outputs=self.structured_outputs,
             logit_bias=self.logit_bias,
             allowed_token_ids=self.allowed_token_ids,
+            offload_prompt_percentage=self.offload_prompt_percentage,
             extra_args=extra_args or None,
             skip_clone=True,  # Created fresh per request, safe to skip clone
             repetition_detection=self.repetition_detection,

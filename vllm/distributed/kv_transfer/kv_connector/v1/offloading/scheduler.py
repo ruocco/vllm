@@ -292,8 +292,23 @@ class OffloadingConnectorScheduler:
             new_tokens = scheduler_output.num_scheduled_tokens[req_id]
             expected_tokens = req.num_computed_tokens + new_tokens
             # with async scheduling, some tokens may be missing
-            total_tokens = min(expected_tokens, req.num_tokens)
+
+            offload_percentage = 100
+            if (
+                req.sampling_params is not None
+                and req.sampling_params.offload_prompt_percentage is not None
+            ):
+                offload_percentage = req.sampling_params.offload_prompt_percentage
+            total_tokens = int(
+                min(expected_tokens, req.num_tokens) * (offload_percentage / 100)
+            )
             num_blocks = total_tokens // group_config.offloaded_block_size
+            logger.debug(
+                "Storing %s of %s tokens (offload_percentage=%s)",
+                total_tokens,
+                req.num_tokens,
+                offload_percentage,
+            )
             start_block_idx = group_state.next_stored_block_idx
             num_new_blocks = num_blocks - start_block_idx
 
