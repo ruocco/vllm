@@ -78,7 +78,7 @@ class SampleRequest:
     lora_request: LoRARequest | None = None
     request_id: str | None = None
     timestamp: float | None = None
-    offload_percentage: float | None = None
+    offload_prompt_tokens: int | None = None
 
 
 # -----------------------------------------------------------------------------
@@ -1520,8 +1520,7 @@ class TimedTrace(BenchmarkDataset):
             prompt_ids = self._expand_prompt(
                 entry.get(self.label_hash_ids, []), input_length, tokenizer
             )
-            offload_lenght = entry.get("optimal_offload_tokens", input_length)
-            offload_percentage = (offload_lenght * 100) / input_length
+            offload_prompt_tokens = entry.get("optimal_offload_tokens", input_length)
             prompt = tokenizer.decode(prompt_ids)
 
             # Get timestamp with proper error handling
@@ -1545,7 +1544,7 @@ class TimedTrace(BenchmarkDataset):
                     multi_modal_data=None,
                     request_id=request_id_prefix + str(ind),
                     timestamp=timestamp,
-                    offload_percentage=offload_percentage,
+                    offload_prompt_tokens=offload_prompt_tokens,
                 )
             )
         return samples

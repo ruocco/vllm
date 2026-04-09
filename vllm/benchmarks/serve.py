@@ -675,7 +675,7 @@ async def benchmark(
         input_requests[0].multi_modal_data,
     )
     if extra_body is not None:
-        extra_body["offload_prompt_percentage"] = input_requests[0].offload_percentage
+        extra_body["kv_transfer_params"] = {"offload_prompt_tokens": input_requests[0].offload_prompt_tokens}
 
     assert (
         test_mm_content is None
@@ -856,7 +856,7 @@ async def benchmark(
             # to make sure all requests get the right offload
             # percentage.
             request_extra_body = extra_body.copy()
-            request_extra_body["offload_prompt_percentage"] = request.offload_percentage
+            request_extra_body["kv_transfer_params"] = {"offload_prompt_tokens": request.offload_prompt_tokens}
         else:
             request_extra_body = extra_body
 
