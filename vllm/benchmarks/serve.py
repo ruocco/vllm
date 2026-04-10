@@ -674,6 +674,8 @@ async def benchmark(
         input_requests[0].expected_output_len,
         input_requests[0].multi_modal_data,
     )
+    if extra_body is not None:
+        extra_body["offload_prompt_percentage"] = input_requests[0].offload_percentage
 
     assert (
         test_mm_content is None
@@ -848,6 +850,9 @@ async def benchmark(
             request.multi_modal_data,
             request.request_id,
         )
+        if extra_body is not None:
+            extra_body["offload_prompt_percentage"] = request.offload_percentage
+
         req_model_id, req_model_name = model_id, model_name
         if lora_modules:
             req_lora_module = next(lora_modules)
