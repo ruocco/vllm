@@ -851,7 +851,14 @@ async def benchmark(
             request.request_id,
         )
         if extra_body is not None:
-            extra_body["offload_prompt_percentage"] = request.offload_percentage
+            # Create a copy for this specific request because
+            # tasks are scheduled asynchronously and we need
+            # to make sure all requests get the right offload
+            # percentage.
+            request_extra_body = extra_body.copy()
+            request_extra_body["offload_prompt_percentage"] = request.offload_percentage
+        else:
+            request_extra_body = extra_body
 
         req_model_id, req_model_name = model_id, model_name
         if lora_modules:
@@ -869,7 +876,7 @@ async def benchmark(
             multi_modal_content=mm_content,
             ignore_eos=ignore_eos,
             extra_headers=extra_headers,
-            extra_body=extra_body,
+            extra_body=request_extra_body,
             request_id=request_id,
         )
         tasks.append(
