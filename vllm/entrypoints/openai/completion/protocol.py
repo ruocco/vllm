@@ -81,7 +81,7 @@ class CompletionRequest(OpenAIBaseModel):
     truncate_prompt_tokens: Annotated[int, Field(ge=-1, le=_INT64_MAX)] | None = None
     allowed_token_ids: list[int] | None = None
     prompt_logprobs: int | None = None
-    offload_prompt_percentage: int | None = 100
+    offload_prompt_percentage: float | None = 100
     # --8<-- [end:completion-sampling-params]
 
     # --8<-- [start:completion-extra-params]

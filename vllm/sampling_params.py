@@ -283,7 +283,7 @@ class SamplingParams(
     skip_reading_prefix_cache: bool | None = None
     thinking_token_budget: int | None = None
     """Maximum number of tokens allowed for thinking operations."""
-    offload_prompt_percentage: int | None = 100
+    offload_prompt_percentage: float | None = 100
     """Percentage of the prompt to be offloaded by OffloadConnector.
     Value should be between 0 and 100."""
 
@@ -326,7 +326,7 @@ class SamplingParams(
         extra_args: dict[str, Any] | None = None,
         skip_clone: bool = False,
         repetition_detection: RepetitionDetectionParams | None = None,
-        offload_prompt_percentage: int | None = 100,
+        offload_prompt_percentage: float | None = 100,
     ) -> "SamplingParams":
         if logit_bias is not None:
             # Convert token_id to integer
@@ -917,7 +917,7 @@ class BeamSearchParams(
 
     beam_width: int
     max_tokens: int
-    offload_prompt_percentage: int
+    offload_prompt_percentage: float
     ignore_eos: bool = False
     temperature: float = 0.0
     length_penalty: float = 1.0
