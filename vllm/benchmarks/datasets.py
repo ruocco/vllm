@@ -1438,8 +1438,10 @@ class TimedTrace(BenchmarkDataset):
                 for k, v in self.vocab.items()
                 if k not in tokenizer.all_special_ids
             }
+            # Create a sorted list of vocab values for deterministic sampling
+            self.vocab_values_sorted = sorted(self.vocab.values())
 
-        sampled_token_ids = random.choices(list(self.vocab.values()), k=num_tokens)
+        sampled_token_ids = random.choices(self.vocab_values_sorted, k=num_tokens)
         return sampled_token_ids
 
     def _expand_prompt(
@@ -1522,7 +1524,6 @@ class TimedTrace(BenchmarkDataset):
                     offload_percentage=offload_percentage,
                 )
             )
-
         return samples
 
 
