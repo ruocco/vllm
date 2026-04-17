@@ -301,7 +301,7 @@ class SamplingParams(
     skip_reading_prefix_cache: bool | None = None
     thinking_token_budget: int | None = None
     """Maximum number of tokens allowed for thinking operations."""
-    offload_prompt_percentage: float | None = 100
+    offload_prompt_tokens: int | None = None
     """Percentage of the prompt to be offloaded by OffloadConnector.
     Value should be between 0 and 100."""
 
@@ -344,7 +344,7 @@ class SamplingParams(
         extra_args: dict[str, Any] | None = None,
         skip_clone: bool = False,
         repetition_detection: RepetitionDetectionParams | None = None,
-        offload_prompt_percentage: float | None = 100,
+        offload_prompt_tokens: int | None = None,
     ) -> "SamplingParams":
         if logit_bias is not None:
             # Convert token_id to integer
@@ -386,7 +386,7 @@ class SamplingParams(
             extra_args=extra_args,
             skip_clone=skip_clone,
             repetition_detection=repetition_detection,
-            offload_prompt_percentage=offload_prompt_percentage,
+            offload_prompt_tokens=offload_prompt_tokens,
         )
 
     def __post_init__(self) -> None:
@@ -523,11 +523,12 @@ class SamplingParams(
                 parameter="prompt_logprobs",
                 value=self.prompt_logprobs,
             )
-        if self.offload_prompt_percentage is not None and (self.offload_prompt_percentage < 0 or self.offload_prompt_percentage > 100):
+        if self.offload_prompt_tokens is not None and (self.offload_prompt_tokens < 0):
             raise VLLMValidationError(
-                f"offload_prompt_percentage must be at least between 0 and 100, got {self.offload_prompt_percentage}.",
-                parameter="offload_prompt_percentage",
-                value=self.offload_prompt_percentage,
+                f"offload_prompt_tokens must be non-negative, got "
+                f"{self.offload_prompt_tokens}.",
+                parameter="offload_prompt_tokens",
+                value=self.offload_prompt_tokens,
             )
         assert isinstance(self.stop_token_ids, list)
         if not all(isinstance(st_id, int) for st_id in self.stop_token_ids):
@@ -916,7 +917,7 @@ class SamplingParams(
             f"skip_special_tokens={self.skip_special_tokens}, "
             "spaces_between_special_tokens="
             f"{self.spaces_between_special_tokens}, "
-            f"offload_prompt_percentage={self.offload_prompt_percentage}, "
+            f"offload_prompt_tokens={self.offload_prompt_tokens}, "
             f"structured_outputs={self.structured_outputs}, "
             f"extra_args={self.extra_args})"
         )
@@ -950,7 +951,7 @@ class BeamSearchParams(
 
     beam_width: int
     max_tokens: int
-    offload_prompt_percentage: float
+    offload_prompt_tokens: int
     ignore_eos: bool = False
     temperature: float = 0.0
     length_penalty: float = 1.0
