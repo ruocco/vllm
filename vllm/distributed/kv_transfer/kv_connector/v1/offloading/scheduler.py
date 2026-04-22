@@ -209,19 +209,22 @@ class OffloadingConnectorScheduler:
             expected_tokens = req.num_computed_tokens + new_tokens
             # with async scheduling, some tokens may be missing
 
-            if (
-                req.sampling_params is not None
-                and req.sampling_params.offload_prompt_tokens is not None
-            ):
+            offload_prompt_tokens = None
+            if req.kv_transfer_params is not None:
+                offload_prompt_tokens = req.kv_transfer_params.get(
+                    "offload_prompt_tokens"
+                )
+
+            if offload_prompt_tokens is not None:
                 total_tokens = min(
                     expected_tokens,
                     req.num_tokens,
-                    req.sampling_params.offload_prompt_tokens,
+                    offload_prompt_tokens,
                 )
                 logger.debug(
                     "Storing %s tokens (offload_prompt_tokens=%s)",
                     total_tokens,
-                    req.sampling_params.offload_prompt_tokens,
+                    offload_prompt_tokens,
                 )
             else:
                 total_tokens = min(expected_tokens, req.num_tokens)
