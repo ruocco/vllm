@@ -229,8 +229,8 @@ class OffloadingConnectorScheduler:
             else:
                 total_tokens = min(expected_tokens, req.num_tokens)
 
-            num_blocks = total_tokens // group_config.offloaded_block_size
-            start_block_idx = group_state.next_stored_block_idx
+            num_blocks = total_tokens // self.offloaded_block_size
+            start_block_idx = self._next_stored_block_idx.get(req_id, 0)
             num_new_blocks = num_blocks - start_block_idx
 
             if num_new_blocks <= 0:
