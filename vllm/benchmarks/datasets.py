@@ -1831,6 +1831,14 @@ def add_dataset_parser(parser: FlexibleArgumentParser):
         help="Number of output tokens per request, used only for prefix "
         "repetition dataset.",
     )
+    prefix_repetition_group.add_argument(
+        "--prefix-repetition-offload-perc",
+        type=float,
+        default=100,
+        help="Percentage of the input tokens that will be offloaded. "
+        "Default is the total input len, i.e 100%."
+        "We take percentage because with sampling it is hard to say the exact length.",
+    )
 
 
 def add_random_dataset_base_args(
@@ -2292,6 +2300,7 @@ def get_samples(args, tokenizer: TokenizerLike) -> list[SampleRequest]:
                 output_len=args.prefix_repetition_output_len,
                 request_id_prefix=args.request_id_prefix,
                 no_oversample=args.no_oversample,
+                prefix_repetition_offload_perc = args.prefix_repetition_offload_perc
             ),
         }
 
@@ -3637,6 +3646,10 @@ class PrefixRepetitionRandomDataset(BenchmarkDataset):
     ) -> list[SampleRequest]:
         vocab_size = tokenizer.vocab_size
         prompts_per_prefix = num_requests // num_prefixes
+        print(kwargs)
+        prefix_repetition_offload_perc: float = float(kwargs.get("prefix_repetition_offload_perc", 100))
+        print(f"offloading percentage in random prefix sampling is {prefix_repetition_offload_perc}")
+        assert prefix_repetition_offload_perc >= 0 and prefix_repetition_offload_perc <= 100
         if prompts_per_prefix == 0:
             raise ValueError(
                 f"num_requests ({num_requests}) must be greater than or equal "
@@ -3676,6 +3689,7 @@ class PrefixRepetitionRandomDataset(BenchmarkDataset):
                         prompt=prompt,
                         prompt_len=prompt_len,
                         expected_output_len=output_len,
+                        offload_prompt_tokens= int(((prompt_len * prefix_repetition_offload_perc) // 100))
                     )
                 )
 
