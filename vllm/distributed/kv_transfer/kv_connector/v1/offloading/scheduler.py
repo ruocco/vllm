@@ -209,6 +209,19 @@ class OffloadingConnectorScheduler:
             expected_tokens = req.num_computed_tokens + new_tokens
             # with async scheduling, some tokens may be missing
             total_tokens = min(expected_tokens, req.num_tokens)
+            params = req.kv_transfer_params
+            if params is not None:
+                max_offload_tokens = params.get("max_offload_tokens")
+                if isinstance(max_offload_tokens, int) and max_offload_tokens >= 0:
+                    if max_offload_tokens < total_tokens:
+                        logger.debug(
+                            "Request %s: capping offload to %d tokens"
+                            " (total_tokens=%d) via max_offload_tokens",
+                            req_id,
+                            max_offload_tokens,
+                            total_tokens,
+                        )
+                    total_tokens = min(total_tokens, max_offload_tokens)
             num_blocks = total_tokens // self.offloaded_block_size
             start_block_idx = self._next_stored_block_idx.get(req_id, 0)
             num_new_blocks = num_blocks - start_block_idx
